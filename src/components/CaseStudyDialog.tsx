@@ -75,8 +75,8 @@ const CaseStudyDialog: React.FC<CaseStudyDialogProps> = ({ isOpen, onClose, sele
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-0 max-w-4xl w-[95vw] sm:w-[90vw] max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader className="p-4 sm:p-6 border-b border-white/30 dark:border-slate-700/50 bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/30 dark:to-purple-950/30 flex-shrink-0">
+      <DialogContent className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-0 max-w-5xl w-[98vw] sm:w-[95vw] max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="p-5 sm:p-7 border-b border-white/30 dark:border-slate-700/50 bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/30 dark:to-purple-950/30 flex-shrink-0">
           <DialogTitle className="text-lg sm:text-xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent flex items-center gap-2">
             <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-violet-500" />
             AI Case Study Generator
@@ -86,7 +86,7 @@ const CaseStudyDialog: React.FC<CaseStudyDialogProps> = ({ isOpen, onClose, sele
           </DialogDescription>
         </DialogHeader>
         
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+        <div className="p-5 sm:p-7 overflow-y-auto flex-1">
           {!showReport ? (
             <div className="flex flex-col items-center justify-center py-4 sm:py-6">
               <div className="w-full max-w-md">
