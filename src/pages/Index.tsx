@@ -3,22 +3,26 @@ import React, { useState } from 'react';
 import CaseQueue from '@/components/CaseQueue';
 import CaseDetail from '@/components/CaseDetail';
 import UserProfile from '@/components/UserProfile';
+import CreateCaseQueue from '@/components/CreateCaseQueue';
+import GenerateCaseStudy from '@/components/GenerateCaseStudy';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { Search, Bell, Settings, Sparkles } from 'lucide-react';
+import { Search, Bell, Settings, Sparkles, Plus, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
   const [selectedCase, setSelectedCase] = useState<number | null>(2);
+  const [activeTab, setActiveTab] = useState('cases');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 transition-all duration-500">
+    <div className="min-h-screen w-full bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 transition-all duration-500">
       {/* Animated background overlay */}
       <div className="fixed inset-0 bg-gradient-to-r from-blue-400/5 via-purple-400/5 to-pink-400/5 dark:from-blue-400/10 dark:via-purple-400/10 dark:to-pink-400/10 animate-pulse"></div>
       
       {/* Modern Header with glassmorphism */}
       <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5 dark:shadow-purple-500/20 px-4 sm:px-6 py-4">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
+        <div className="flex justify-between items-center w-full">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="relative group">
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
@@ -71,17 +75,55 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Main Content with improved spacing and backgrounds */}
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-140px)] lg:h-[calc(100vh-89px)] max-w-7xl mx-auto p-4 gap-4">
-        <div className="flex-1 flex flex-col lg:flex-row min-h-0 gap-4">
-          <CaseQueue selectedCase={selectedCase} onSelectCase={setSelectedCase} />
-          <div className="flex-1 flex flex-col lg:flex-row min-h-0 gap-4">
-            <CaseDetail caseId={selectedCase} />
-            <div className="hidden xl:block">
-              <UserProfile />
+      {/* Main Content with Tabs */}
+      <div className="w-full p-4 space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-xl shadow-lg">
+            <TabsTrigger value="cases" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <Search className="h-4 w-4" />
+              <span className="hidden sm:inline">Case Management</span>
+              <span className="sm:hidden">Cases</span>
+            </TabsTrigger>
+            <TabsTrigger value="create" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Create Case</span>
+              <span className="sm:hidden">Create</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Charts</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="cases" className="space-y-4">
+            <div className="flex flex-col xl:flex-row gap-4 min-h-[calc(100vh-200px)]">
+              <div className="w-full xl:w-80 2xl:w-96 flex-shrink-0">
+                <CaseQueue selectedCase={selectedCase} onSelectCase={setSelectedCase} />
+              </div>
+              <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
+                <div className="flex-1">
+                  <CaseDetail caseId={selectedCase} />
+                </div>
+                <div className="w-full lg:w-80 flex-shrink-0">
+                  <UserProfile />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="create" className="space-y-4">
+            <div className="max-w-4xl mx-auto">
+              <CreateCaseQueue />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="w-full">
+              <GenerateCaseStudy />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

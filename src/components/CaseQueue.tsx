@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Clock, AlertCircle, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Case {
   id: number;
@@ -111,9 +111,9 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
   );
 
   return (
-    <div className="w-full lg:w-80 xl:w-96 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
+    <div className="h-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
       {/* Enhanced Header */}
-      <div className="p-6 border-b border-white/30 dark:border-slate-700/50 bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/30 dark:to-purple-950/30">
+      <div className="p-6 border-b border-white/30 dark:border-slate-700/50 bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/30 dark:to-purple-950/30 flex-shrink-0">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h2 className="text-xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent">
@@ -148,22 +148,23 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
         </div>
       </div>
       
-      {/* Enhanced Cases List */}
-      <div className="flex-1 overflow-y-auto">
-        {filteredCases.map((caseItem) => {
-          const priorityConfig = getPriorityConfig(caseItem.priority);
-          const PriorityIcon = priorityConfig.icon;
-          
-          return (
-            <div
-              key={caseItem.id}
-              onClick={() => onSelectCase(caseItem.id)}
-              className={`group p-6 border-b border-white/20 dark:border-slate-800/50 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-violet-50/50 hover:to-purple-50/50 dark:hover:from-violet-950/30 dark:hover:to-purple-950/30 ${
-                selectedCase === caseItem.id 
-                  ? 'bg-gradient-to-r from-violet-100/60 to-purple-100/60 dark:from-violet-900/40 dark:to-purple-900/40 border-l-4 border-l-violet-500 shadow-lg shadow-violet-500/10' 
-                  : ''
-              }`}
-            >
+      {/* Enhanced Cases List with proper scroll */}
+      <ScrollArea className="flex-1">
+        <div className="p-0">
+          {filteredCases.map((caseItem) => {
+            const priorityConfig = getPriorityConfig(caseItem.priority);
+            const PriorityIcon = priorityConfig.icon;
+            
+            return (
+              <div
+                key={caseItem.id}
+                onClick={() => onSelectCase(caseItem.id)}
+                className={`group p-6 border-b border-white/20 dark:border-slate-800/50 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-violet-50/50 hover:to-purple-50/50 dark:hover:from-violet-950/30 dark:hover:to-purple-950/30 ${
+                  selectedCase === caseItem.id 
+                    ? 'bg-gradient-to-r from-violet-100/60 to-purple-100/60 dark:from-violet-900/40 dark:to-purple-900/40 border-l-4 border-l-violet-500 shadow-lg shadow-violet-500/10' 
+                    : ''
+                }`}
+              >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -205,18 +206,19 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
                 </Badge>
               </div>
             </div>
-          );
-        })}
+            );
+          })}
 
-        {filteredCases.length === 0 && (
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="h-16 w-16 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center mb-4">
-              <Search className="h-8 w-8 text-violet-400 dark:text-violet-500" />
+          {filteredCases.length === 0 && (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <div className="h-16 w-16 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center mb-4">
+                <Search className="h-8 w-8 text-violet-400 dark:text-violet-500" />
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">No cases match your search</p>
             </div>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">No cases match your search</p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 };
