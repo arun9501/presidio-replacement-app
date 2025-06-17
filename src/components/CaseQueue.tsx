@@ -1,8 +1,9 @@
 
-import React from 'react';
-import { Search, Filter, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Filter, Plus, Clock, AlertCircle, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 interface Case {
   id: number;
@@ -71,13 +72,13 @@ const cases: Case[] = [
   }
 ];
 
-const getPriorityColor = (priority: string) => {
+const getPriorityConfig = (priority: string) => {
   switch (priority) {
-    case 'Urgent': return 'bg-red-100 text-red-800';
-    case 'High': return 'bg-orange-100 text-orange-800';
-    case 'Medium': return 'bg-yellow-100 text-yellow-800';
-    case 'Low': return 'bg-green-100 text-green-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'Urgent': return { color: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800', icon: AlertCircle };
+    case 'High': return { color: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800', icon: AlertCircle };
+    case 'Medium': return { color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800', icon: Clock };
+    case 'Low': return { color: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800', icon: Clock };
+    default: return { color: 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800', icon: Clock };
   }
 };
 
@@ -87,66 +88,113 @@ interface CaseQueueProps {
 }
 
 const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredCases = cases.filter(caseItem =>
+    caseItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    caseItem.customer.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
+    <div className="w-full lg:w-80 xl:w-96 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col">
+      {/* Header */}
+      <div className="p-4 lg:p-6 border-b border-slate-200/60 dark:border-slate-700/60">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Case Queue</h2>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Case Queue</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{filteredCases.length} active cases</p>
+          </div>
+          <Button size="sm" className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg">
             <Plus className="h-4 w-4 mr-1" />
-            New Case
+            New
           </Button>
         </div>
         
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search cases..."
-            className="pl-10"
-          />
-        </div>
-        
-        <div className="flex items-center justify-between text-sm text-gray-600">
-          <Button variant="ghost" size="sm" className="p-0 h-auto">
-            <Filter className="h-4 w-4 mr-1" />
-            Filter
-          </Button>
-          <span>Sort: Latest</span>
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+            <Input
+              placeholder="Search cases..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:border-indigo-300 dark:focus:border-indigo-500"
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" size="sm" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+              <Filter className="h-4 w-4 mr-1" />
+              Filter
+            </Button>
+            <span className="text-sm text-slate-500 dark:text-slate-400">Sort: Latest</span>
+          </div>
         </div>
       </div>
       
+      {/* Cases List */}
       <div className="flex-1 overflow-y-auto">
-        {cases.map((case_) => (
-          <div
-            key={case_.id}
-            onClick={() => onSelectCase(case_.id)}
-            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-              selectedCase === case_.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
-            }`}
-          >
-            <div className="flex justify-between items-start mb-2">
-              <span className="font-medium text-gray-900">#{case_.id}: {case_.title}</span>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(case_.priority)}`}>
-                  {case_.priority}
-                </span>
-                {case_.status === 'Open' && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                    Open
-                  </span>
-                )}
-                {case_.status === 'Resolved' && (
-                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                    Resolved
-                  </span>
-                )}
+        {filteredCases.map((caseItem) => {
+          const priorityConfig = getPriorityConfig(caseItem.priority);
+          const PriorityIcon = priorityConfig.icon;
+          
+          return (
+            <div
+              key={caseItem.id}
+              onClick={() => onSelectCase(caseItem.id)}
+              className={`group p-4 lg:p-6 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-all duration-200 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950 dark:hover:to-purple-950 ${
+                selectedCase === caseItem.id 
+                  ? 'bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 border-l-4 border-l-indigo-500' 
+                  : ''
+              }`}
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">#{caseItem.id}</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                      {caseItem.title}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 truncate">{caseItem.customer}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1 text-slate-900 dark:text-slate-100">
+                  <DollarSign className="h-3 w-3" />
+                  <span className="text-sm font-semibold">{caseItem.amount}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={`text-xs font-medium border ${priorityConfig.color}`}>
+                    <PriorityIcon className="h-3 w-3 mr-1" />
+                    {caseItem.priority}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-500 dark:text-slate-400">{caseItem.date}</span>
+                <Badge 
+                  variant={caseItem.status === 'Open' ? 'default' : 'secondary'}
+                  className={`text-xs ${
+                    caseItem.status === 'Open' 
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' 
+                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                  }`}
+                >
+                  {caseItem.status}
+                </Badge>
               </div>
             </div>
-            <div className="text-sm text-gray-600 mb-1">{case_.customer}</div>
-            <div className="text-sm font-medium text-gray-900 mb-1">{case_.amount}</div>
-            <div className="text-xs text-gray-500">{case_.date}</div>
+          );
+        })}
+
+        {filteredCases.length === 0 && (
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <Search className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
+            <p className="text-slate-500 dark:text-slate-400">No cases match your search</p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
