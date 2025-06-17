@@ -135,7 +135,7 @@ const Index = () => {
                 {/* Right Sidebar - User Profile */}
                 <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 mt-4 lg:mt-0 flex flex-col overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
                   <div className="flex-1 overflow-auto p-4">
-                    <UserProfile />
+                    <UserProfile selectedCaseId={selectedCase} />
                   </div>
                 </div>
               </div>

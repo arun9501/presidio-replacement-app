@@ -1,33 +1,141 @@
-
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { User, Shield, TrendingUp, Activity, Calendar, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Case, cases } from './CaseDetail';
 
-const recentActivity = [
-  {
-    case: '# 2: Bob Johnson',
-    status: 'Open',
-    description: 'Unauthorized Transaction case Open on Mar 26, 2025, 08:05 AM'
+// User profile data for each customer
+const userProfiles = {
+  'Bob Johnson': {
+    id: 2,
+    riskScore: '68/100 (Medium)',
+    registration: '21/02/2025',
+    balance: '$3,440.47',
+    activity: {
+      bets: 0,
+      deposits: 1,
+      withdrawals: 2,
+      logins: 27
+    },
+    recentActivity: "Customer reported unauthorized transaction from unknown device. Customer stated: 'I did not make this bet, I was not even using my account at that time.'"
   },
-  {
-    case: '# 3: Xavier Brown',
-    status: 'Open',
-    description: 'Unauthorized Transaction case Open on Apr 07, 2025, 08:42 AM'
+  'Alice Smith': {
+    id: 1,
+    riskScore: '42/100 (Low)',
+    registration: '15/01/2025',
+    balance: '$1,250.00',
+    activity: {
+      bets: 3,
+      deposits: 2,
+      withdrawals: 1,
+      logins: 15
+    },
+    recentActivity: "Customer disputed a payment made on their account. Customer stated: 'I never authorized this transaction.'"
   },
-  {
-    case: '# 4: Jason Parker',
-    status: 'Open',
-    description: 'Unauthorized Transaction case Open on Mar 30, 2025, 09:35 AM'
+  'Xavier Brown': {
+    id: 3,
+    riskScore: '75/100 (High)',
+    registration: '03/03/2025',
+    balance: '$2,780.25',
+    activity: {
+      bets: 12,
+      deposits: 4,
+      withdrawals: 1,
+      logins: 42
+    },
+    recentActivity: "Customer reported unauthorized transaction. Customer stated: 'Someone accessed my account without permission.'"
   },
-  {
-    case: '# 8: George Sanders',
-    status: 'Closed',
-    description: 'Payment Dispute case resolved'
+  'Jason Parker': {
+    id: 4,
+    riskScore: '82/100 (High)',
+    registration: '10/01/2025',
+    balance: '$520.75',
+    activity: {
+      bets: 8,
+      deposits: 3,
+      withdrawals: 2,
+      logins: 31
+    },
+    recentActivity: "Customer reported unauthorized transaction from a different location. Customer stated: 'I was not at that location at the time.'"
+  },
+  'Emily Rodriguez': {
+    id: 5,
+    riskScore: '55/100 (Medium)',
+    registration: '05/12/2024',
+    balance: '$875.30',
+    activity: {
+      bets: 5,
+      deposits: 2,
+      withdrawals: 1,
+      logins: 19
+    },
+    recentActivity: "Customer disputed a payment. Customer stated: 'I did not authorize this transaction.'"
+  },
+  'George Sanders': {
+    id: 6,
+    riskScore: '35/100 (Low)',
+    registration: '18/10/2024',
+    balance: '$1,450.60',
+    activity: {
+      bets: 2,
+      deposits: 1,
+      withdrawals: 0,
+      logins: 12
+    },
+    recentActivity: "Customer disputed a payment but later confirmed it was valid."
   }
-];
+};
 
-const UserProfile: React.FC = () => {
+// Similar cases data by case type
+const similarCasesByType = {
+  'Unauthorized Transaction': [
+    {
+      case: '# 2: Bob Johnson',
+      status: 'Open',
+      description: 'Unauthorized Transaction case Open on Mar 26, 2025, 08:05 AM'
+    },
+    {
+      case: '# 3: Xavier Brown',
+      status: 'Open',
+      description: 'Unauthorized Transaction case Open on Apr 07, 2025, 08:42 AM'
+    },
+    {
+      case: '# 4: Jason Parker',
+      status: 'Open',
+      description: 'Unauthorized Transaction case Open on Mar 30, 2025, 09:35 AM'
+    }
+  ],
+  'Payment Dispute': [
+    {
+      case: '# 1: Alice Smith',
+      status: 'Open',
+      description: 'Payment Dispute case Open on Apr 07, 2025, 02:11 PM'
+    },
+    {
+      case: '# 5: Emily Rodriguez',
+      status: 'Open',
+      description: 'Payment Dispute case Open on Jan 16, 2025, 09:28 AM'
+    },
+    {
+      case: '# 6: George Sanders',
+      status: 'Resolved',
+      description: 'Payment Dispute case resolved on Nov 04, 2024'
+    }
+  ]
+};
+
+interface UserProfileProps {
+  selectedCaseId: number | null;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId }) => {
+  // Find the selected case
+  const selectedCase = cases.find(c => c.id === selectedCaseId);
+  
+  // Get the user profile based on the selected case
+  const userProfile = selectedCase 
+    ? userProfiles[selectedCase.customer as keyof typeof userProfiles] 
+    : userProfiles['Bob Johnson']; // Default to Bob Johnson if no case selected
+
   return (
     <div className="w-80 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
       {/* Enhanced Header */}
@@ -56,11 +164,11 @@ const UserProfile: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">ID:</span>
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">2</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{userProfile.id}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Name:</span>
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Bob Johnson</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{selectedCase?.customer || 'Bob Johnson'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Status:</span>
@@ -80,12 +188,12 @@ const UserProfile: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Risk Score:</span>
                 <Badge className="bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 dark:from-orange-900/70 dark:to-amber-900/70 dark:text-orange-300 border-orange-200 dark:border-orange-800 text-xs">
-                  68/100 (Medium)
+                  {userProfile.riskScore}
                 </Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Registration:</span>
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">21/02/2025</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{userProfile.registration}</span>
               </div>
             </div>
           </div>
@@ -95,7 +203,7 @@ const UserProfile: React.FC = () => {
               <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <label className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Account Balance</label>
             </div>
-            <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">$3,440.47</div>
+            <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{userProfile.balance}</div>
           </div>
         </div>
 
@@ -107,19 +215,19 @@ const UserProfile: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
-              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">0</div>
+              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{userProfile.activity.bets}</div>
               <div className="text-xs text-slate-600 dark:text-slate-400">Bets</div>
             </div>
             <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
-              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">1</div>
+              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{userProfile.activity.deposits}</div>
               <div className="text-xs text-slate-600 dark:text-slate-400">Deposits</div>
             </div>
             <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
-              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">2</div>
+              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{userProfile.activity.withdrawals}</div>
               <div className="text-xs text-slate-600 dark:text-slate-400">Withdrawals</div>
             </div>
             <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
-              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">27</div>
+              <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{userProfile.activity.logins}</div>
               <div className="text-xs text-slate-600 dark:text-slate-400">Logins</div>
             </div>
           </div>
@@ -133,8 +241,7 @@ const UserProfile: React.FC = () => {
           </div>
           <div className="p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg border border-white/40 dark:border-slate-700/40">
             <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-              Customer reported unauthorized transaction from unknown device. 
-              Customer stated: 'I did not make this bet, I was not even using my account at that time.'
+              {userProfile.recentActivity}
             </p>
           </div>
         </div>
@@ -146,26 +253,34 @@ const UserProfile: React.FC = () => {
             <h3 className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Similar Cases</h3>
           </div>
           <div className="space-y-3">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="group p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer border border-white/40 dark:border-slate-700/40 hover:border-indigo-200/50 dark:hover:border-indigo-700/50 hover:shadow-lg hover:shadow-indigo-500/10">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
-                    {activity.case}
-                  </span>
-                  <Badge 
-                    variant="outline"
-                    className={`text-xs font-medium rounded-lg ${
-                      activity.status === 'Open' 
-                        ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 dark:from-emerald-900/70 dark:to-green-900/70 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' 
-                        : 'bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 dark:from-slate-800/70 dark:to-gray-800/70 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    {activity.status}
-                  </Badge>
+            {selectedCase && similarCasesByType[selectedCase.title] ? (
+              similarCasesByType[selectedCase.title].map((activity, index) => (
+                <div key={index} className="group p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer border border-white/40 dark:border-slate-700/40 hover:border-indigo-200/50 dark:hover:border-indigo-700/50 hover:shadow-lg hover:shadow-indigo-500/10">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+                      {activity.case}
+                    </span>
+                    <Badge 
+                      variant="outline"
+                      className={`text-xs font-medium rounded-lg ${
+                        activity.status === 'Open' 
+                          ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 dark:from-emerald-900/70 dark:to-green-900/70 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' 
+                          : 'bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 dark:from-slate-800/70 dark:to-gray-800/70 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {activity.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{activity.description}</p>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{activity.description}</p>
+              ))
+            ) : (
+              <div className="p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg border border-white/40 dark:border-slate-700/40">
+                <p className="text-sm text-slate-600 dark:text-slate-400 text-center">
+                  Select a case to view similar cases
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

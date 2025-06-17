@@ -171,16 +171,6 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                selectedCase.status === 'Open' 
-                  ? 'bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 text-blue-800 dark:text-blue-300 border-blue-200/50 dark:border-blue-800/50'
-                  : 'bg-gradient-to-r from-slate-100 to-gray-100 dark:from-slate-800/50 dark:to-gray-800/50 text-slate-700 dark:text-slate-300 border-slate-200/50 dark:border-slate-700/50'
-              }`}>
-                {selectedCase.status}
-              </span>
-              <Button variant="outline" size="sm" className="border-violet-200 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/50">
-                Ask AI
-              </Button>
               <Button size="sm" className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 rounded-xl">
                 Generate Case Study
               </Button>

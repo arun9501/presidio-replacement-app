@@ -93,17 +93,11 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
     <div className="h-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
       {/* Enhanced Header */}
       <div className="p-6 border-b border-white/30 dark:border-slate-700/50 bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/30 dark:to-purple-950/30 flex-shrink-0">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent">
-              Case Queue
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{filteredCases.length} active cases</p>
-          </div>
-          <Button size="sm" className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 rounded-xl">
-            <Plus className="h-4 w-4 mr-1" />
-            New
-          </Button>
+        <div className="mb-4">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent">
+            Case Queue
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{filteredCases.length} active cases</p>
         </div>
         
         <div className="space-y-3">
