@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Shield, TrendingUp, Activity, Calendar, DollarSign } from 'lucide-react';
+import { User, Shield, TrendingUp, Activity, Calendar, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const recentActivity = [
@@ -30,28 +30,18 @@ const recentActivity = [
 const UserProfile: React.FC = () => {
   return (
     <div className="w-80 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
-      {/* Enhanced Header with Logout */}
+      {/* Enhanced Header */}
       <div className="p-6 border-b border-white/30 dark:border-slate-700/50 bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/30 dark:to-purple-950/30">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
-              <User className="text-white h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent">
-                User Profile
-              </h2>
-              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Account Overview</p>
-            </div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+            <User className="text-white h-5 w-5" />
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all duration-200 group"
-          >
-            <LogOut className="h-4 w-4 mr-1 group-hover:scale-110 transition-transform" />
-            Logout
-          </Button>
+          <div>
+            <h2 className="text-lg font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent">
+              User Profile
+            </h2>
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Account Overview</p>
+          </div>
         </div>
       </div>
 

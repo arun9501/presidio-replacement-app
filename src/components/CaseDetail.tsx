@@ -80,9 +80,9 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
     <div className="flex-1 overflow-y-auto">
       <div className="p-6">
         {/* Header */}
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5 rounded-2xl p-6 mb-6">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5 rounded-2xl p-4 sm:p-6 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-            <div>
+            <div className="w-full sm:w-auto">
               <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent mb-2">
                 #{caseId}: Unauthorized Transaction
               </h1>
@@ -101,14 +101,14 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 sm:gap-3">
+            <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
               <span className="px-3 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-200/50 dark:border-blue-800/50">
                 Open
               </span>
-              <Button variant="outline" className="border-violet-200 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/50">
+              <Button variant="outline" size="sm" className="border-violet-200 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/50">
                 Ask AI
               </Button>
-              <Button className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 rounded-xl">
+              <Button size="sm" className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 rounded-xl">
                 Generate Case Study
               </Button>
             </div>
@@ -224,13 +224,13 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
 
         {/* Transaction Sequence */}
         <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-emerald-500/10 dark:shadow-emerald-500/20 rounded-2xl">
-          <div className="pb-4 bg-gradient-to-r from-emerald-50/50 to-cyan-50/50 dark:from-emerald-950/30 dark:to-cyan-950/30 border-b border-white/30 dark:border-slate-700/50 px-6 pt-6">
+          <div className="pb-3 bg-gradient-to-r from-emerald-50/50 to-cyan-50/50 dark:from-emerald-950/30 dark:to-cyan-950/30 border-b border-white/30 dark:border-slate-700/50 px-4 sm:px-6 pt-4 sm:pt-6">
             <h3 className="flex items-center gap-2 text-lg font-bold bg-gradient-to-r from-emerald-700 to-cyan-700 dark:from-emerald-300 dark:to-cyan-300 bg-clip-text text-transparent">
               <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               Transaction Sequence
             </h3>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

@@ -57,7 +57,7 @@ const Index = () => {
           </div>
 
           {/* Enhanced Search Bar */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-4 lg:mx-8">
+          <div className="hidden md:flex items-center flex-1 max-w-md ml-auto mr-4 lg:mr-8">
             <div className="relative w-full group">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 h-4 w-4 transition-colors duration-200" />
               <Input

@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { Search, Filter, Plus, Clock, AlertCircle, DollarSign } from 'lucide-react';
+import { Search, Filter, Plus, Clock, AlertCircle, DollarSign, ChevronDown, ArrowUpDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Case {
   id: number;
@@ -102,13 +111,49 @@ interface CaseQueueProps {
   onSelectCase: (caseId: number) => void;
 }
 
+type SortOption = 'latest' | 'oldest' | 'priority' | 'amount';
+type FilterOption = 'all' | 'open' | 'resolved' | 'high' | 'urgent';
+
 const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('latest');
+  const [filterBy, setFilterBy] = useState<FilterOption>('all');
 
-  const filteredCases = cases.filter(caseItem =>
-    caseItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    caseItem.customer.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Apply filters
+  let filteredCases = cases.filter(caseItem => {
+    // Search filter
+    const matchesSearch = 
+      caseItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseItem.customer.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Status and priority filters
+    const matchesFilter = 
+      filterBy === 'all' ||
+      (filterBy === 'open' && caseItem.status === 'Open') ||
+      (filterBy === 'resolved' && caseItem.status === 'Resolved') ||
+      (filterBy === 'high' && caseItem.priority === 'High') ||
+      (filterBy === 'urgent' && caseItem.priority === 'Urgent');
+    
+    return matchesSearch && matchesFilter;
+  });
+
+  // Apply sorting
+  filteredCases = [...filteredCases].sort((a, b) => {
+    switch (sortBy) {
+      case 'latest':
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      case 'oldest':
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      case 'priority': {
+        const priorityOrder: Record<string, number> = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      }
+      case 'amount':
+        return parseFloat(b.amount.replace('$', '')) - parseFloat(a.amount.replace('$', ''));
+      default:
+        return 0;
+    }
+  });
 
   return (
     <div className="h-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
@@ -139,11 +184,76 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
           </div>
           
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" className="text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-100/50 dark:hover:bg-violet-900/30 rounded-lg transition-all duration-200">
-              <Filter className="h-4 w-4 mr-1" />
-              Filter
-            </Button>
-            <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">Sort: Latest</span>
+            {/* Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-100/50 dark:hover:bg-violet-900/30 rounded-lg transition-all duration-200">
+                  <Filter className="h-4 w-4 mr-1" />
+                  Filter
+                  <ChevronDown className="h-3 w-3 ml-1 opacity-70" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-700/50">
+                <DropdownMenuLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Filter by Status</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setFilterBy('all')} className="flex items-center justify-between">
+                    <span>All Cases</span>
+                    {filterBy === 'all' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterBy('open')} className="flex items-center justify-between">
+                    <span>Open Cases</span>
+                    {filterBy === 'open' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterBy('resolved')} className="flex items-center justify-between">
+                    <span>Resolved Cases</span>
+                    {filterBy === 'resolved' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Filter by Priority</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setFilterBy('high')} className="flex items-center justify-between">
+                    <span>High Priority</span>
+                    {filterBy === 'high' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterBy('urgent')} className="flex items-center justify-between">
+                    <span>Urgent Priority</span>
+                    {filterBy === 'urgent' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            {/* Sort Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-100/50 dark:hover:bg-violet-900/30 rounded-lg transition-all duration-200">
+                  <ArrowUpDown className="h-3 w-3 mr-1" />
+                  <span className="text-sm">Sort: {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-700/50">
+                <DropdownMenuLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Sort by</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setSortBy('latest')} className="flex items-center justify-between">
+                    <span>Latest</span>
+                    {sortBy === 'latest' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('oldest')} className="flex items-center justify-between">
+                    <span>Oldest</span>
+                    {sortBy === 'oldest' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('priority')} className="flex items-center justify-between">
+                    <span>Priority</span>
+                    {sortBy === 'priority' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('amount')} className="flex items-center justify-between">
+                    <span>Amount</span>
+                    {sortBy === 'amount' && <Check className="h-3 w-3 text-violet-500" />}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
