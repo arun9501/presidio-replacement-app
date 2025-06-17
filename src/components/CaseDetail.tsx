@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { User, DollarSign, Calendar, BarChart2, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import CaseStudyDialog from './CaseStudyDialog';
 
 // Case data type
 export interface Case {
@@ -131,6 +132,8 @@ interface CaseDetailProps {
 }
 
 const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
+  const [showCaseStudyDialog, setShowCaseStudyDialog] = useState(false);
+  
   // Find the selected case from the cases array
   const selectedCase = cases.find(c => c.id === caseId);
 
@@ -171,7 +174,11 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
-              <Button size="sm" className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 rounded-xl">
+              <Button 
+                size="sm" 
+                className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 rounded-xl"
+                onClick={() => setShowCaseStudyDialog(true)}
+              >
                 Generate Case Study
               </Button>
             </div>
@@ -333,6 +340,13 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
           </div>
         </div>
       </div>
+      
+      {/* Case Study Dialog */}
+      <CaseStudyDialog 
+        isOpen={showCaseStudyDialog} 
+        onClose={() => setShowCaseStudyDialog(false)} 
+        selectedCase={selectedCase} 
+      />
     </div>
   );
 };
