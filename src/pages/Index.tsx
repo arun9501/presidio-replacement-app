@@ -16,23 +16,23 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('cases');
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 transition-all duration-500">
+    <div className="min-h-screen w-full bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 transition-all duration-500 overflow-x-hidden">
       {/* Animated background overlay */}
       <div className="fixed inset-0 bg-gradient-to-r from-blue-400/5 via-purple-400/5 to-pink-400/5 dark:from-blue-400/10 dark:via-purple-400/10 dark:to-pink-400/10 animate-pulse"></div>
       
       {/* Modern Header with glassmorphism */}
-      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5 dark:shadow-purple-500/20 px-4 sm:px-6 py-4">
+      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5 dark:shadow-purple-500/20 px-3 sm:px-6 py-3 sm:py-4">
         <div className="flex justify-between items-center w-full">
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative group">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
-                <Sparkles className="text-white h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
+                <Sparkles className="text-white h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 animate-pulse" />
               </div>
-              <div className="absolute -top-1 -right-1 h-4 w-4 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full animate-pulse shadow-lg"></div>
-              <div className="absolute -bottom-1 -left-1 h-3 w-3 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full animate-bounce opacity-75"></div>
+              <div className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full animate-pulse shadow-lg"></div>
+              <div className="absolute -bottom-1 -left-1 h-2 w-2 sm:h-3 sm:w-3 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full animate-bounce opacity-75"></div>
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:via-purple-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:via-purple-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
                 AutoCaseAI
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block font-medium">Intelligent Dispute Resolution</p>
@@ -40,23 +40,23 @@ const Index = () => {
           </div>
 
           {/* Enhanced Search Bar */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
+          <div className="hidden md:flex items-center flex-1 max-w-md mx-4 lg:mx-8">
             <div className="relative w-full group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 h-4 w-4 transition-colors duration-200" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 h-4 w-4 transition-colors duration-200" />
               <Input
                 placeholder="Search cases, customers..."
-                className="pl-12 pr-4 py-3 bg-white/50 dark:bg-slate-800/50 border-white/30 dark:border-slate-700/50 focus:border-violet-300 dark:focus:border-violet-500 rounded-xl shadow-lg shadow-violet-500/5 backdrop-blur-sm transition-all duration-200 focus:shadow-violet-500/20"
+                className="pl-10 pr-3 py-2 h-10 bg-white/50 dark:bg-slate-800/50 border-white/30 dark:border-slate-700/50 focus:border-violet-300 dark:focus:border-violet-500 rounded-xl shadow-lg shadow-violet-500/5 backdrop-blur-sm transition-all duration-200 focus:shadow-violet-500/20"
               />
             </div>
           </div>
 
           {/* Enhanced Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-10 w-10 relative hover:bg-violet-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-200 group">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 relative hover:bg-violet-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-200 group">
               <Bell className="h-4 w-4 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse shadow-lg"></span>
+              <span className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse shadow-lg"></span>
             </Button>
-            <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-violet-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-200 group">
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-violet-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-200 group">
               <Settings className="h-4 w-4 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
             </Button>
             <ThemeToggle />
@@ -65,61 +65,61 @@ const Index = () => {
       </header>
 
       {/* Enhanced Mobile Search */}
-      <div className="md:hidden px-4 py-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/50">
+      <div className="md:hidden px-3 py-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/50 sticky top-[73px] z-10">
         <div className="relative group">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 h-4 w-4 transition-colors duration-200" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 h-4 w-4 transition-colors duration-200" />
           <Input
             placeholder="Search cases..."
-            className="pl-12 bg-white/70 dark:bg-slate-800/70 border-white/30 dark:border-slate-700/50 rounded-xl shadow-lg backdrop-blur-sm"
+            className="pl-10 h-9 bg-white/70 dark:bg-slate-800/70 border-white/30 dark:border-slate-700/50 rounded-xl shadow-lg backdrop-blur-sm"
           />
         </div>
       </div>
 
       {/* Main Content with Tabs */}
-      <div className="w-full p-4 space-y-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-xl shadow-lg">
-            <TabsTrigger value="cases" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
-              <Search className="h-4 w-4" />
+      <div className="w-full px-2 sm:px-4 py-4 flex flex-col h-[calc(100vh-73px)] md:h-[calc(100vh-60px)]">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
+          <TabsList className="grid w-full grid-cols-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-xl shadow-lg overflow-hidden">
+            <TabsTrigger value="cases" className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <Search className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">Case Management</span>
               <span className="sm:hidden">Cases</span>
             </TabsTrigger>
-            <TabsTrigger value="create" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
-              <Plus className="h-4 w-4" />
+            <TabsTrigger value="create" className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <Plus className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">Create Case</span>
               <span className="sm:hidden">Create</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
-              <BarChart3 className="h-4 w-4" />
+            <TabsTrigger value="analytics" className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <BarChart3 className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">Analytics</span>
               <span className="sm:hidden">Charts</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="cases" className="space-y-4">
-            <div className="flex flex-col xl:flex-row gap-4 min-h-[calc(100vh-200px)]">
-              <div className="w-full xl:w-80 2xl:w-96 flex-shrink-0">
+          <TabsContent value="cases" className="h-[calc(100vh-140px)] md:h-[calc(100vh-120px)]">
+            <div className="flex flex-col xl:flex-row gap-4 h-full">
+              <div className="w-full xl:w-80 2xl:w-96 flex-shrink-0 overflow-auto bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50 shadow-lg">
                 <CaseQueue selectedCase={selectedCase} onSelectCase={setSelectedCase} />
               </div>
               <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
-                <div className="flex-1">
+                <div className="flex-1 overflow-auto bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50 shadow-lg">
                   <CaseDetail caseId={selectedCase} />
                 </div>
-                <div className="w-full lg:w-80 flex-shrink-0">
+                <div className="w-full lg:w-80 flex-shrink-0 mt-4 lg:mt-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50 shadow-lg">
                   <UserProfile />
                 </div>
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="create" className="space-y-4">
-            <div className="max-w-4xl mx-auto">
+          <TabsContent value="create" className="h-[calc(100vh-140px)] md:h-[calc(100vh-120px)]">
+            <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 h-full overflow-auto bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50 shadow-lg">
               <CreateCaseQueue />
             </div>
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-4">
-            <div className="w-full">
+          <TabsContent value="analytics" className="h-[calc(100vh-140px)] md:h-[calc(100vh-120px)]">
+            <div className="w-full px-2 sm:px-4 h-full overflow-auto bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50 shadow-lg">
               <GenerateCaseStudy />
             </div>
           </TabsContent>
