@@ -13,73 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Case {
-  id: number;
-  title: string;
-  customer: string;
-  amount: string;
-  date: string;
-  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
-  status: 'Open' | 'Resolved';
-}
-
-const cases: Case[] = [
-  {
-    id: 1,
-    title: 'Payment Dispute',
-    customer: 'Alice Smith',
-    amount: '$50',
-    date: 'Apr 07, 2025, 02:11 PM',
-    priority: 'Medium',
-    status: 'Open'
-  },
-  {
-    id: 2,
-    title: 'Unauthorized Transaction',
-    customer: 'Bob Johnson',
-    amount: '$936.85',
-    date: 'Mar 26, 2025, 08:05 AM',
-    priority: 'High',
-    status: 'Open'
-  },
-  {
-    id: 3,
-    title: 'Unauthorized Transaction',
-    customer: 'Xavier Brown',
-    amount: '$1000',
-    date: 'Apr 07, 2025, 08:42 AM',
-    priority: 'High',
-    status: 'Open'
-  },
-  {
-    id: 4,
-    title: 'Unauthorized Transaction',
-    customer: 'Jason Parker',
-    amount: '$100',
-    date: 'Mar 30, 2025, 09:35 AM',
-    priority: 'Urgent',
-    status: 'Open'
-  },
-  {
-    id: 5,
-    title: 'Payment Dispute',
-    customer: 'Emily Rodriguez',
-    amount: '$150',
-    date: 'Jan 16, 2025, 09:28 AM',
-    priority: 'Medium',
-    status: 'Open'
-  },
-  {
-    id: 6,
-    title: 'Payment Dispute',
-    customer: 'George Sanders',
-    amount: '$297.31',
-    date: 'Nov 04, 2024, 10:06 AM',
-    priority: 'Low',
-    status: 'Resolved'
-  }
-];
+import { Case, cases } from './CaseDetail';
 
 const getPriorityConfig = (priority: string) => {
   switch (priority) {

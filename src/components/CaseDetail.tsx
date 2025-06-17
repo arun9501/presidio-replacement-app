@@ -1,9 +1,77 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { User, DollarSign, Calendar, BarChart2, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+
+// Case data type
+export interface Case {
+  id: number;
+  title: string;
+  customer: string;
+  amount: string;
+  date: string;
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
+  status: 'Open' | 'Resolved';
+}
+
+// Sample case data for fallback
+export const cases: Case[] = [
+  {
+    id: 1,
+    title: 'Payment Dispute',
+    customer: 'Alice Smith',
+    amount: '$50',
+    date: 'Apr 07, 2025, 02:11 PM',
+    priority: 'Medium',
+    status: 'Open'
+  },
+  {
+    id: 2,
+    title: 'Unauthorized Transaction',
+    customer: 'Bob Johnson',
+    amount: '$936.85',
+    date: 'Mar 26, 2025, 08:05 AM',
+    priority: 'High',
+    status: 'Open'
+  },
+  {
+    id: 3,
+    title: 'Unauthorized Transaction',
+    customer: 'Xavier Brown',
+    amount: '$1000',
+    date: 'Apr 07, 2025, 08:42 AM',
+    priority: 'High',
+    status: 'Open'
+  },
+  {
+    id: 4,
+    title: 'Unauthorized Transaction',
+    customer: 'Jason Parker',
+    amount: '$100',
+    date: 'Mar 30, 2025, 09:35 AM',
+    priority: 'Urgent',
+    status: 'Open'
+  },
+  {
+    id: 5,
+    title: 'Payment Dispute',
+    customer: 'Emily Rodriguez',
+    amount: '$150',
+    date: 'Jan 16, 2025, 09:28 AM',
+    priority: 'Medium',
+    status: 'Open'
+  },
+  {
+    id: 6,
+    title: 'Payment Dispute',
+    customer: 'George Sanders',
+    amount: '$297.31',
+    date: 'Nov 04, 2024, 10:06 AM',
+    priority: 'Low',
+    status: 'Resolved'
+  }
+];
 
 const activityData = [
   { name: 'Bets', disputed: 1, average: 1 },
@@ -58,14 +126,15 @@ const transactions = [
   }
 ];
 
-// This function is no longer needed as we're using inline styles with dark mode support
-
 interface CaseDetailProps {
   caseId: number | null;
 }
 
 const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
-  if (!caseId) {
+  // Find the selected case from the cases array
+  const selectedCase = cases.find(c => c.id === caseId);
+
+  if (!caseId || !selectedCase) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center p-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
@@ -84,26 +153,30 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
             <div className="w-full sm:w-auto">
               <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-700 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent mb-2">
-                #{caseId}: Unauthorized Transaction
+                #{selectedCase.id}: {selectedCase.title}
               </h1>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                  <span>Bob Johnson</span>
+                  <span>{selectedCase.customer}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>936.85</span>
+                  <span>{selectedCase.amount.replace('$', '')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <span>Mar 26, 2025, 08:05 AM</span>
+                  <span>{selectedCase.date}</span>
                 </div>
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
-              <span className="px-3 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-200/50 dark:border-blue-800/50">
-                Open
+              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${
+                selectedCase.status === 'Open' 
+                  ? 'bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 text-blue-800 dark:text-blue-300 border-blue-200/50 dark:border-blue-800/50'
+                  : 'bg-gradient-to-r from-slate-100 to-gray-100 dark:from-slate-800/50 dark:to-gray-800/50 text-slate-700 dark:text-slate-300 border-slate-200/50 dark:border-slate-700/50'
+              }`}>
+                {selectedCase.status}
               </span>
               <Button variant="outline" size="sm" className="border-violet-200 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/50">
                 Ask AI
