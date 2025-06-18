@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { Search, Filter, Plus, Clock, AlertCircle, DollarSign, ChevronDown, ArrowUpDown, Check, Loader2, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +44,7 @@ const getPriorityConfig = (priority: string) => {
 interface CaseQueueProps {
   selectedCase: number | null;
   onSelectCase: (caseId: number) => void;
+  onUserInfoChange?: (userInfo: any) => void;
 }
 
 type SortOption = 'latest' | 'oldest' | 'priority' | 'amount';
@@ -71,7 +72,7 @@ interface ApiCase {
   recent_activities?: any[];
 }
 
-const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => {
+const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase, onUserInfoChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
@@ -80,6 +81,7 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalCases, setTotalCases] = useState(0);
+  const [apiCases, setApiCases] = useState<ApiCase[]>([]);
   const limit = 10;
 
   // Fetch cases from API
@@ -119,13 +121,21 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
             apiCases = response;
           }
           
+          // Store API cases in state for later use
+          setApiCases(apiCases);
+          
           // Map API cases to our Case interface
           const formattedCases = apiCases.map(apiCase => {
+            // Store user info for the selected case
+            if (apiCase.case_id === selectedCase && apiCase.user_info && onUserInfoChange) {
+              onUserInfoChange(apiCase.user_info);
+            }
+            
             return {
               id: apiCase.case_id,
               title: apiCase.case_type || 'Untitled Case',
               customer: apiCase.user_info?.name || `User ${apiCase.user_id}`,
-              amount: typeof apiCase.amount === 'number' ? `$${apiCase.amount.toFixed(2)}` : `$${apiCase.amount}`,
+              amount: typeof apiCase.amount === 'number' ? `${apiCase.amount.toFixed(2)}` : `${apiCase.amount}`,
               date: new Date(apiCase.created_at).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
@@ -162,7 +172,34 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
     };
     
     fetchCases();
-  }, [page, filterBy, searchTerm, selectedCase, onSelectCase]);
+    // Removed selectedCase from dependency array to prevent re-fetching when a case is selected
+  }, [page, filterBy, searchTerm, onSelectCase, onUserInfoChange]);
+
+  // Update user info when selected case changes - optimized for speed
+  useEffect(() => {
+    if (selectedCase && onUserInfoChange) {
+      // First immediately create minimal user info from case data for fast display
+      const selectedCaseData = cases.find(c => c.id === selectedCase);
+      if (selectedCaseData) {
+        const minimalUserInfo = {
+          user_id: selectedCase,
+          name: selectedCaseData.customer,
+          registration_date: new Date().toLocaleDateString(),
+          risk_score: "50/100 (Medium)",
+          balance: selectedCaseData.amount
+        };
+        // Send minimal info immediately
+        onUserInfoChange(minimalUserInfo);
+      }
+      
+      // Then check for more detailed API data
+      const selectedApiCase = apiCases.find(apiCase => apiCase.case_id === selectedCase);
+      if (selectedApiCase?.user_info) {
+        // Send complete info when available
+        onUserInfoChange(selectedApiCase.user_info);
+      }
+    }
+  }, [selectedCase, apiCases, cases, onUserInfoChange]);
 
   // Apply sorting (client-side for now)
   const sortedCases = Array.isArray(cases) ? [...cases].sort((a, b) => {
@@ -333,7 +370,10 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
                 return (
                   <div 
                     key={caseItem.id}
-                    onClick={() => onSelectCase(caseItem.id)}
+                    onClick={() => {
+                      // Just call onSelectCase - the useEffect will handle updating user info
+                      onSelectCase(caseItem.id);
+                    }}
                     className={`
                       p-4 rounded-xl cursor-pointer transition-all duration-200
                       ${selectedCase === caseItem.id 
@@ -403,4 +443,7 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase }) => 
   );
 };
 
+// Memoize the component to prevent unnecessary re-renders
+// Memoize the component with custom comparison
+// Don't memoize the CaseQueue component to ensure it always responds to changes
 export default CaseQueue;

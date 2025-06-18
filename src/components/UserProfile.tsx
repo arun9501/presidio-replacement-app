@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
+import { caseQueueService } from '@/services/caseQueueService';
 import { User, Shield, TrendingUp, Activity, Calendar, DollarSign, ArrowRight, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -91,17 +92,48 @@ const userProfiles = {
 interface UserProfileProps {
   selectedCaseId: number | null;
   onSelectCase?: (caseId: number) => void;
+  userInfo?: any;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase, userInfo }) => {
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [userProfile, setUserProfile] = useState(userProfiles["Bob Johnson"]);
+  const [apiUserInfo, setApiUserInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Fetch case details when selectedCaseId changes
+  // Handle user data updates - combined effect for better performance
   useEffect(() => {
+    // If userInfo is passed as prop, use it immediately
+    if (userInfo) {
+      setApiUserInfo(userInfo);
+      
+      // Create a merged profile with API data
+      const apiProfile = {
+        id: userInfo.user_id,
+        riskScore: userInfo.risk_score || "50/100 (Medium)",
+        registration: userInfo.registration_date || new Date().toLocaleDateString(),
+        balance: userInfo.balance || "$0.00",
+        activity: userInfo.activity || {
+          bets: 0,
+          deposits: 0,
+          withdrawals: 0,
+          logins: 0,
+        },
+        recentActivity: userInfo.recent_activity || ""
+      };
+      
+      setUserProfile(apiProfile);
+      // Skip API call if we already have user info
+      if (selectedCaseId === userInfo.user_id) {
+        return;
+      }
+    } else {
+      // Reset only if no userInfo is provided
+      setApiUserInfo(null);
+    }
+    
     if (selectedCaseId) {
       setIsLoading(true);
       
@@ -110,19 +142,40 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase 
       if (staticCase) {
         setSelectedCase(staticCase);
         const profile = userProfiles[staticCase.customer as keyof typeof userProfiles];
-        if (profile) {
+        if (profile && !userInfo) {
           setUserProfile(profile);
         }
       }
       
-      // Then try to fetch from API
-      import('@/services/caseQueueService').then(({ caseQueueService }) => {
-        caseQueueService.getCaseDetails(selectedCaseId)
-          .then(data => {
+      // Then try to fetch from API directly
+      caseQueueService.getCaseDetails(selectedCaseId)
+        .then(data => {
             if (data && data.case) {
               setSelectedCase(data.case);
-              // If we have user profile data for this customer
-              if (data.case.customer) {
+              
+              // If we have user_info from API, use it
+              if (data.user_info) {
+                setApiUserInfo(data.user_info);
+                
+                // Create a merged profile with API data
+                const apiProfile = {
+                  id: data.user_info.user_id,
+                  riskScore: data.user_info.risk_score || "50/100 (Medium)",
+                  registration: data.user_info.registration_date || new Date().toLocaleDateString(),
+                  balance: data.user_info.balance || "$0.00",
+                  activity: data.user_info.activity || {
+                    bets: 0,
+                    deposits: 0,
+                    withdrawals: 0,
+                    logins: 0,
+                  },
+                  recentActivity: data.user_info.recent_activity || ""
+                };
+                
+                setUserProfile(apiProfile);
+              } 
+              // Fallback to static profiles if no API data
+              else if (data.case.customer) {
                 const profile = userProfiles[data.case.customer as keyof typeof userProfiles];
                 if (profile) {
                   setUserProfile(profile);
@@ -135,7 +188,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase 
             console.error('Failed to fetch case details:', err);
             setIsLoading(false);
           });
-      });
       
       // Fetch similar cases
       similarCasesService.getSimilarCases(selectedCaseId)
@@ -151,7 +203,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase 
       setUserProfile(userProfiles["Bob Johnson"]);
       setSimilarCases([]);
     }
-  }, [selectedCaseId]);
+  }, [selectedCaseId, userInfo]);
 
   return (
     <div className="w-full bg-white/70 dark:bg-slate-900/70 border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
@@ -185,7 +237,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase 
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Name:</span>
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{selectedCase?.customer || "Bob Johnson"}</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{apiUserInfo?.name || selectedCase?.customer || "Bob Johnson"}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Status:</span>
@@ -332,4 +384,12 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase 
   );
 };
 
-export default UserProfile;
+// Memoize the component to prevent unnecessary re-renders
+// Memoize the component with custom comparison to ensure updates when selectedCaseId changes
+export default memo(UserProfile, (prevProps, nextProps) => {
+  // Only re-render if these props haven't changed
+  return (
+    prevProps.selectedCaseId === nextProps.selectedCaseId && 
+    prevProps.userInfo === nextProps.userInfo
+  );
+});

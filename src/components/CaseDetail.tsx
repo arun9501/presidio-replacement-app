@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
+import { caseQueueService } from '@/services/caseQueueService';
 import { Button } from '@/components/ui/button';
 import { User, DollarSign, Calendar, BarChart2, TrendingUp, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
@@ -131,14 +132,29 @@ const transactions = [
 interface CaseDetailProps {
   caseId: number | null;
   onSelectCase?: (caseId: number) => void;
+  userInfo?: {
+    user_id: number;
+    name: string;
+    registration_date: string;
+    risk_score: string;
+    balance: string;
+    activity?: {
+      bets: number;
+      deposits: number;
+      withdrawals: number;
+      logins: number;
+    };
+    recent_activity?: string;
+  };
 }
 
-const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
+const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase, userInfo }) => {
   const [showCaseStudyDialog, setShowCaseStudyDialog] = useState(false);
   const [transactionData, setTransactionData] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [caseData, setCaseData] = useState<Case | null>(null);
+  const [userData, setUserData] = useState<any>(null);
   const [activityChartData, setActivityChartData] = useState(activityData);
   const [timelineChartData, setTimelineChartData] = useState(timelineData);
   
@@ -146,18 +162,35 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
   const fallbackCase = cases.find(c => c.id === caseId);
   
   // Fetch case details and transaction data when case ID changes
+  // Handle user data updates
   useEffect(() => {
+    // Reset chart data when case changes to ensure fresh data
+    setActivityChartData(activityData);
+    setTimelineChartData(timelineData);
+    
+    // If userInfo is passed as prop, use it immediately
+    if (userInfo) {
+      setUserData(userInfo);
+    } else {
+      // Reset only if no userInfo is provided
+      setUserData(null);
+    }
+    
     if (caseId) {
       setIsLoading(true);
       setError(null);
       
-      // Use the caseQueueService to get case details including transactions from api/v1/case-queue
-      import('@/services/caseQueueService').then(({ caseQueueService }) => {
-        caseQueueService.getCaseDetails(caseId)
-          .then(data => {
+      // Use the caseQueueService to get case details including transactions
+      // The service uses caching to prevent repeated API calls
+      caseQueueService.getCaseDetails(caseId)
+        .then(data => {
             setCaseData(data.case);
+            // Store user info if available and not already provided via props
+            if (data.user_info && !userInfo) {
+              setUserData(data.user_info);
+            }
             // Format transactions from case queue API response
-            // data.transactions should already contain the related_transactions from the API
+            // data.transactions contains the related_transactions from the case queue API
             const formattedTransactions = (data.transactions || []).map(tx => ({
               transaction_id: tx.transaction_id,
               case_id: tx.case_id,
@@ -180,8 +213,22 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
               }) : undefined
             }));
             setTransactionData(formattedTransactions);
-            if (data.activity && Array.isArray(data.activity)) setActivityChartData(data.activity);
-            if (data.timeline && Array.isArray(data.timeline)) setTimelineChartData(data.timeline);
+            
+            // Format activity data for chart
+            if (data.activity) {
+              const formattedActivityData = [
+                { name: 'Bets', disputed: data.activity.bets || 0, average: 1 },
+                { name: 'Deposits', disputed: data.activity.deposits || 0, average: 1 },
+                { name: 'Withdraws', disputed: data.activity.withdrawals || 0, average: 1 },
+                { name: 'Logins', disputed: data.activity.logins || 0, average: 1 }
+              ];
+              setActivityChartData(formattedActivityData);
+            }
+            
+            // Format timeline data for chart
+            if (data.timeline && Array.isArray(data.timeline) && data.timeline.length > 0) {
+              setTimelineChartData(data.timeline);
+            }
             setIsLoading(false);
           })
           .catch(err => {
@@ -189,15 +236,17 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
             setError('Failed to load case data');
             setIsLoading(false);
           });
-      });
     } else {
       setTransactionData([]);
       setCaseData(null);
     }
-  }, [caseId]);
+  }, [caseId, userInfo]);
+  
+  // Find the selected case immediately for faster display
+  const fallbackCaseData = fallbackCase ? { ...fallbackCase } : null;
   
   // Use the fetched case data or fallback to the static data
-  const selectedCase = caseData || fallbackCase;
+  const selectedCase = caseData || fallbackCaseData;
 
   if (!caseId || !selectedCase) {
     return (
@@ -223,15 +272,22 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                  <span>{selectedCase.customer}</span>
+                  <span className="font-medium">{userData?.name || selectedCase.customer}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>{selectedCase.amount.replace('$', '')}</span>
+                  <span className="font-medium">{typeof selectedCase.amount === 'string' ? selectedCase.amount : `${selectedCase.amount}`}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <span>{selectedCase.date}</span>
+                  <span className="font-medium">{selectedCase.date ? new Date(selectedCase.date).toLocaleString('en-US', {
+                    month: 'short',
+                    day: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  }) : 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -355,17 +411,17 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
         </div>
 
         {/* Transaction Sequence */}
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-emerald-500/10 dark:shadow-emerald-500/20 rounded-2xl">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-emerald-500/10 dark:shadow-emerald-500/20 rounded-2xl flex flex-col">
           <div className="pb-3 bg-gradient-to-r from-emerald-50/50 to-cyan-50/50 dark:from-emerald-950/30 dark:to-cyan-950/30 border-b border-white/30 dark:border-slate-700/50 px-4 sm:px-6 pt-4 sm:pt-6">
             <h3 className="flex items-center gap-2 text-lg font-bold bg-gradient-to-r from-emerald-700 to-cyan-700 dark:from-emerald-300 dark:to-cyan-300 bg-clip-text text-transparent">
               <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               Transaction Sequence
             </h3>
           </div>
-          <div className="p-4 sm:p-6">
-            <div className="overflow-x-auto">
+          <div className="p-4 sm:p-6 flex-1 flex flex-col">
+            <div className="overflow-auto max-h-[300px] sm:max-h-[400px] rounded-lg">
               <table className="w-full">
-                <thead>
+                <thead className="sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm z-10">
                   <tr className="border-b border-white/30 dark:border-slate-700/50">
                     <th className="text-left py-3 px-4 font-medium text-slate-600 dark:text-slate-400 text-sm">TIME</th>
                     <th className="text-left py-3 px-4 font-medium text-slate-600 dark:text-slate-400 text-sm">TRANSACTION</th>
@@ -442,4 +498,12 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
   );
 };
 
-export default CaseDetail;
+// Memoize the component to prevent unnecessary re-renders
+// Memoize the component with custom comparison to ensure updates when caseId changes
+export default memo(CaseDetail, (prevProps, nextProps) => {
+  // Only re-render if these props haven't changed
+  return (
+    prevProps.caseId === nextProps.caseId && 
+    prevProps.userInfo === nextProps.userInfo
+  );
+});

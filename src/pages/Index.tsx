@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { cases as fallbackCases } from "@/components/CaseDetail";
 import CaseQueue from "@/components/CaseQueue";
 import CaseDetail from "@/components/CaseDetail";
 import UserProfile from "@/components/UserProfile";
@@ -13,13 +14,41 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [selectedCase, setSelectedCase] = useState<number | null>(2);
+  const [userInfo, setUserInfo] = useState<any>(null);
   
-  // Function to handle case selection
-  const handleCaseSelection = (caseId: number) => {
+  // Function to handle case selection - optimized for immediate feedback
+  const handleCaseSelection = useCallback((caseId: number) => {
+    // Find case in static data for immediate display
+    const staticCase = fallbackCases.find(c => c.id === caseId);
+    if (staticCase) {
+      // Create minimal user info for immediate display
+      const minimalUserInfo = {
+        user_id: caseId,
+        name: staticCase.customer,
+        registration_date: new Date().toLocaleDateString(),
+        risk_score: "50/100 (Medium)",
+        balance: staticCase.amount
+      };
+      // Update user info immediately before API call completes
+      setUserInfo(minimalUserInfo);
+    }
+    
+    // Update selected case
     setSelectedCase(caseId);
-  };
+  }, []);
+  
+  // Memoize the userInfo setter to prevent re-renders
+  const handleUserInfoChange = useCallback((info: any) => {
+    console.log("User info updated:", info);
+    setUserInfo(info);
+  }, []);
   const [activeTab, setActiveTab] = useState("cases");
   const isMobile = useIsMobile();
+  
+  // Log when selected case changes
+  useEffect(() => {
+    console.log("Selected case changed to:", selectedCase);
+  }, [selectedCase]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 transition-all duration-500 overflow-x-hidden">
@@ -110,7 +139,11 @@ const Index = () => {
               {/* Left Sidebar - Case Queue */}
               <div className="w-full xl:w-80 2xl:w-96 flex-shrink-0 overflow-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
                 <div className="p-4">
-                  <CaseQueue selectedCase={selectedCase} onSelectCase={handleCaseSelection} />
+                  <CaseQueue 
+                    selectedCase={selectedCase} 
+                    onSelectCase={handleCaseSelection} 
+                    onUserInfoChange={handleUserInfoChange} 
+                  />
                 </div>
               </div>
 
@@ -119,14 +152,24 @@ const Index = () => {
                 {/* Center Area - Case Details */}
                 <div className="flex-1 flex flex-col overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
                   <div className="flex-1 overflow-auto p-4">
-                    <CaseDetail caseId={selectedCase} onSelectCase={handleCaseSelection} />
+                    <CaseDetail 
+                      caseId={selectedCase} 
+                      onSelectCase={handleCaseSelection} 
+                      userInfo={userInfo}
+                      key={`case-detail-${selectedCase}`}
+                    />
                   </div>
                 </div>
 
                 {/* Right Sidebar - User Profile */}
                 <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 mt-4 lg:mt-0 flex flex-col overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
                   <div className="flex-1 overflow-auto p-4">
-                    <UserProfile selectedCaseId={selectedCase} key={selectedCase} onSelectCase={handleCaseSelection} />
+                    <UserProfile 
+                      selectedCaseId={selectedCase}
+                      onSelectCase={handleCaseSelection}
+                      userInfo={userInfo}
+                      key={`user-profile-${selectedCase}`}
+                    />
                   </div>
                 </div>
               </div>
