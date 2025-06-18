@@ -1,7 +1,9 @@
-import React from "react";
-import { User, Shield, TrendingUp, Activity, Calendar, DollarSign } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { User, Shield, TrendingUp, Activity, Calendar, DollarSign, ArrowRight, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Case, cases } from "./CaseDetail";
+import { SimilarCase, similarCasesService } from "@/services/similarCasesService";
 
 // User profile data for each customer
 const userProfiles = {
@@ -126,14 +128,40 @@ const similarCasesByType = {
 
 interface UserProfileProps {
   selectedCaseId: number | null;
+  onSelectCase?: (caseId: number) => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase }) => {
+  const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedCaseId) {
+      setIsLoading(true);
+      setError(null);
+      
+      similarCasesService.getSimilarCases(selectedCaseId)
+        .then(data => {
+          setSimilarCases(data);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          console.error('Failed to fetch similar cases:', err);
+          setError('Failed to load similar cases');
+          setIsLoading(false);
+        });
+    } else {
+      setSimilarCases([]);
+    }
+  }, [selectedCaseId]);
   // Find the selected case
   const selectedCase = cases.find((c) => c.id === selectedCaseId);
 
   // Get the user profile based on the selected case
-  const userProfile = selectedCase ? userProfiles[selectedCase.customer as keyof typeof userProfiles] : userProfiles["Bob Johnson"]; // Default to Bob Johnson if no case selected
+  const userProfile = selectedCase && userProfiles[selectedCase.customer as keyof typeof userProfiles] 
+    ? userProfiles[selectedCase.customer as keyof typeof userProfiles] 
+    : userProfiles["Bob Johnson"]; // Default to Bob Johnson if no case selected
 
   return (
     <div className="w-full bg-white/70 dark:bg-slate-900/70 border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
@@ -244,38 +272,68 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId }) => {
         </div>
 
         {/* Enhanced Similar Cases */}
-        <div className="p-4 bg-gradient-to-r from-indigo-50/50 to-blue-50/50 dark:from-indigo-950/30 dark:to-blue-950/30 rounded-xl border border-indigo-200/30 dark:border-indigo-800/30">
+        <div className="p-4 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl border border-amber-200/30 dark:border-amber-800/30">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-            <h3 className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Similar Cases</h3>
+            <Calendar className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300">Similar Cases</h3>
           </div>
           <div className="space-y-3">
-            {selectedCase && similarCasesByType[selectedCase.title] ? (
-              similarCasesByType[selectedCase.title].map((activity, index) => (
-                <div
-                  key={index}
-                  className="group p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer border border-white/40 dark:border-slate-700/40 hover:border-indigo-200/50 dark:hover:border-indigo-700/50 hover:shadow-lg hover:shadow-indigo-500/10">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 text-amber-500 animate-spin mr-2" />
+                <span className="text-sm text-slate-600 dark:text-slate-400">Loading similar cases...</span>
+              </div>
+            ) : error ? (
+              <div className="p-3 bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/50 dark:border-rose-800/30 rounded-lg text-center">
+                <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+              </div>
+            ) : similarCases.length === 0 ? (
+              <div className="p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg border border-white/40 dark:border-slate-700/40">
+                <p className="text-sm text-slate-600 dark:text-slate-400 text-center">No similar cases found</p>
+              </div>
+            ) : (
+              similarCases.map((similarCase) => (
+                <div 
+                  key={similarCase.id}
+                  className="group p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer border border-white/40 dark:border-slate-700/40 hover:border-amber-200/50 dark:hover:border-amber-700/50 hover:shadow-lg hover:shadow-amber-500/10"
+                  onClick={() => onSelectCase && onSelectCase(similarCase.id)}
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
-                      {activity.case}
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs font-medium rounded-lg ${
-                        activity.status === "Open"
-                          ? "bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 dark:from-emerald-900/70 dark:to-green-900/70 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                          : "bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 dark:from-slate-800/70 dark:to-gray-800/70 dark:text-slate-300 border-slate-200 dark:border-slate-700"
-                      }`}>
-                      {activity.status}
-                    </Badge>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
+                          #{similarCase.id}: {similarCase.title}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        {similarCase.customer} • {similarCase.amount} • {similarCase.date}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectCase && onSelectCase(similarCase.id);
+                      }}
+                    >
+                      <ArrowRight className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+                    </Button>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{activity.description}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+                        style={{ width: `${similarCase.similarity}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                      {similarCase.similarity}%
+                    </span>
+                  </div>
                 </div>
               ))
-            ) : (
-              <div className="p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg border border-white/40 dark:border-slate-700/40">
-                <p className="text-sm text-slate-600 dark:text-slate-400 text-center">Select a case to view similar cases</p>
-              </div>
             )}
           </div>
         </div>

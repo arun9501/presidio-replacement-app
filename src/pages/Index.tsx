@@ -13,6 +13,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [selectedCase, setSelectedCase] = useState<number | null>(2);
+  
+  // Function to handle case selection
+  const handleCaseSelection = (caseId: number) => {
+    setSelectedCase(caseId);
+  };
   const [activeTab, setActiveTab] = useState("cases");
   const isMobile = useIsMobile();
 
@@ -105,7 +110,7 @@ const Index = () => {
               {/* Left Sidebar - Case Queue */}
               <div className="w-full xl:w-80 2xl:w-96 flex-shrink-0 overflow-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
                 <div className="p-4">
-                  <CaseQueue selectedCase={selectedCase} onSelectCase={setSelectedCase} />
+                  <CaseQueue selectedCase={selectedCase} onSelectCase={handleCaseSelection} />
                 </div>
               </div>
 
@@ -114,14 +119,14 @@ const Index = () => {
                 {/* Center Area - Case Details */}
                 <div className="flex-1 flex flex-col overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
                   <div className="flex-1 overflow-auto p-4">
-                    <CaseDetail caseId={selectedCase} />
+                    <CaseDetail caseId={selectedCase} onSelectCase={handleCaseSelection} />
                   </div>
                 </div>
 
                 {/* Right Sidebar - User Profile */}
                 <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 mt-4 lg:mt-0 flex flex-col overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5">
                   <div className="flex-1 overflow-auto p-4">
-                    <UserProfile selectedCaseId={selectedCase} />
+                    <UserProfile selectedCaseId={selectedCase} key={selectedCase} onSelectCase={handleCaseSelection} />
                   </div>
                 </div>
               </div>

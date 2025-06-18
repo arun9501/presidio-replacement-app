@@ -16,7 +16,12 @@ const CreateCaseQueue: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Creating new case:', newCase);
+    // Format the amount with $ sign
+    const formattedCase = {
+      ...newCase,
+      amount: newCase.amount ? `${parseFloat(newCase.amount).toFixed(2)}` : ''
+    };
+    console.log('Creating new case:', formattedCase);
     // Reset form
     setNewCase({ title: '', customer: '', amount: '', priority: 'Medium' });
   };
@@ -68,13 +73,19 @@ const CreateCaseQueue: React.FC = () => {
                 <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 Amount
               </label>
-              <Input
-                id="amount"
-                value={newCase.amount}
-                onChange={(e) => setNewCase({...newCase, amount: e.target.value})}
-                placeholder="$0.00"
-                className="bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50 focus:border-violet-300 dark:focus:border-violet-500 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400">$</span>
+                <Input
+                  id="amount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newCase.amount}
+                  onChange={(e) => setNewCase({...newCase, amount: e.target.value})}
+                  placeholder="0.00"
+                  className="pl-7 bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50 focus:border-violet-300 dark:focus:border-violet-500 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200"
+                />
+              </div>
             </div>
             
             <div className="space-y-1.5">

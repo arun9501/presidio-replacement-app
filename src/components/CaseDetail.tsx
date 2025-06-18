@@ -130,9 +130,10 @@ const transactions = [
 
 interface CaseDetailProps {
   caseId: number | null;
+  onSelectCase?: (caseId: number) => void;
 }
 
-const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
+const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
   const [showCaseStudyDialog, setShowCaseStudyDialog] = useState(false);
   const [transactionData, setTransactionData] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -387,6 +388,8 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
             </div>
           </div>
         </div>
+        
+
       </div>
       
       {/* Case Study Dialog */}
