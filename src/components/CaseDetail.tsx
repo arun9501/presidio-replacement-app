@@ -4,7 +4,7 @@ import { User, DollarSign, Calendar, BarChart2, TrendingUp, Loader2 } from 'luci
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import CaseStudyDialog from './CaseStudyDialog';
-import { transactionService, Transaction } from '@/services/transactionService';
+import { Transaction } from '@/services/transactionService';
 
 // Case data type
 export interface Case {
@@ -138,30 +138,66 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
   const [transactionData, setTransactionData] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [caseData, setCaseData] = useState<Case | null>(null);
+  const [activityChartData, setActivityChartData] = useState(activityData);
+  const [timelineChartData, setTimelineChartData] = useState(timelineData);
   
-  // Find the selected case from the cases array
-  const selectedCase = cases.find(c => c.id === caseId);
+  // Find the selected case from the cases array for fallback
+  const fallbackCase = cases.find(c => c.id === caseId);
   
-  // Fetch transaction data when case ID changes
+  // Fetch case details and transaction data when case ID changes
   useEffect(() => {
     if (caseId) {
       setIsLoading(true);
       setError(null);
       
-      transactionService.getTransactionsByCaseId(caseId)
-        .then(data => {
-          setTransactionData(data);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          console.error('Failed to fetch transactions:', err);
-          setError('Failed to load transaction data');
-          setIsLoading(false);
-        });
+      // Use the caseQueueService to get case details including transactions from api/v1/case-queue
+      import('@/services/caseQueueService').then(({ caseQueueService }) => {
+        caseQueueService.getCaseDetails(caseId)
+          .then(data => {
+            setCaseData(data.case);
+            // Format transactions from case queue API response
+            // data.transactions should already contain the related_transactions from the API
+            const formattedTransactions = (data.transactions || []).map(tx => ({
+              transaction_id: tx.transaction_id,
+              case_id: tx.case_id,
+              timestamp: tx.timestamp,
+              transaction_type: tx.transaction_type,
+              amount: typeof tx.amount === 'number' 
+                ? (tx.amount < 0 ? `- ${Math.abs(tx.amount).toFixed(2)}` : `+ ${tx.amount.toFixed(2)}`)
+                : tx.amount,
+              balance: typeof tx.balance === 'number'
+                ? `${tx.balance.toFixed(2)}`
+                : tx.balance,
+              status: tx.status,
+              time: tx.timestamp ? new Date(tx.timestamp).toLocaleString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }) : undefined
+            }));
+            setTransactionData(formattedTransactions);
+            if (data.activity && Array.isArray(data.activity)) setActivityChartData(data.activity);
+            if (data.timeline && Array.isArray(data.timeline)) setTimelineChartData(data.timeline);
+            setIsLoading(false);
+          })
+          .catch(err => {
+            console.error('Failed to fetch case details:', err);
+            setError('Failed to load case data');
+            setIsLoading(false);
+          });
+      });
     } else {
       setTransactionData([]);
+      setCaseData(null);
     }
   }, [caseId]);
+  
+  // Use the fetched case data or fallback to the static data
+  const selectedCase = caseData || fallbackCase;
 
   if (!caseId || !selectedCase) {
     return (
@@ -228,7 +264,7 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
                   average: { label: "30-day Avg", color: "#10b981" }
                 }} className="w-full h-full">
                   <ResponsiveContainer>
-                    <BarChart data={activityData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
+                    <BarChart data={activityChartData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                       <XAxis dataKey="name" className="text-xs" tick={{ fontSize: 10 }} />
                       <YAxis className="text-xs" tick={{ fontSize: 10 }} width={30} />
@@ -267,7 +303,7 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
                   betAmount: { label: "Bet Amount", color: "#10b981" }
                 }} className="w-full h-full">
                   <ResponsiveContainer>
-                    <LineChart data={timelineData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
+                    <LineChart data={timelineChartData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                       <XAxis dataKey="date" className="text-xs" tick={{ fontSize: 10 }} />
                       <YAxis className="text-xs" tick={{ fontSize: 10 }} width={30} />
@@ -360,11 +396,15 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase }) => {
                       <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">{transaction.time || new Date(transaction.timestamp).toLocaleString()}</td>
                       <td className="py-3 px-4 text-sm text-slate-900 dark:text-slate-200">{transaction.transaction_type}</td>
                       <td className={`py-3 px-4 text-sm font-medium ${
-                        transaction.amount && transaction.amount.toString().startsWith('+') ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                        transaction.amount && (transaction.amount.toString().startsWith('+') || transaction.amount > 0) ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                       }`}>
-                        {transaction.amount}
+                        {typeof transaction.amount === 'number' 
+                          ? (transaction.amount < 0 ? `- ${Math.abs(transaction.amount).toFixed(2)}` : `+ ${transaction.amount.toFixed(2)}`)
+                          : transaction.amount}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-900 dark:text-slate-200">{transaction.balance}</td>
+                      <td className="py-3 px-4 text-sm text-slate-900 dark:text-slate-200">
+                        {typeof transaction.balance === 'number' ? `${transaction.balance.toFixed(2)}` : transaction.balance}
+                      </td>
                       <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           transaction.status === 'Failed' ? 'bg-rose-100/70 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300 border border-rose-200/50 dark:border-rose-800/50' : 

@@ -88,44 +88,6 @@ const userProfiles = {
   },
 };
 
-// Similar cases data by case type
-const similarCasesByType = {
-  "Unauthorized Transaction": [
-    {
-      case: "# 2: Bob Johnson",
-      status: "Open",
-      description: "Unauthorized Transaction case Open on Mar 26, 2025, 08:05 AM",
-    },
-    {
-      case: "# 3: Xavier Brown",
-      status: "Open",
-      description: "Unauthorized Transaction case Open on Apr 07, 2025, 08:42 AM",
-    },
-    {
-      case: "# 4: Jason Parker",
-      status: "Open",
-      description: "Unauthorized Transaction case Open on Mar 30, 2025, 09:35 AM",
-    },
-  ],
-  "Payment Dispute": [
-    {
-      case: "# 1: Alice Smith",
-      status: "Open",
-      description: "Payment Dispute case Open on Apr 07, 2025, 02:11 PM",
-    },
-    {
-      case: "# 5: Emily Rodriguez",
-      status: "Open",
-      description: "Payment Dispute case Open on Jan 16, 2025, 09:28 AM",
-    },
-    {
-      case: "# 6: George Sanders",
-      status: "Resolved",
-      description: "Payment Dispute case resolved on Nov 04, 2024",
-    },
-  ],
-};
-
 interface UserProfileProps {
   selectedCaseId: number | null;
   onSelectCase?: (caseId: number) => void;
@@ -133,35 +95,63 @@ interface UserProfileProps {
 
 const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase }) => {
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
+  const [selectedCase, setSelectedCase] = useState<Case | null>(null);
+  const [userProfile, setUserProfile] = useState(userProfiles["Bob Johnson"]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  
+  // Fetch case details when selectedCaseId changes
   useEffect(() => {
     if (selectedCaseId) {
       setIsLoading(true);
-      setError(null);
       
+      // Find the case in the static data first for immediate display
+      const staticCase = cases.find((c) => c.id === selectedCaseId);
+      if (staticCase) {
+        setSelectedCase(staticCase);
+        const profile = userProfiles[staticCase.customer as keyof typeof userProfiles];
+        if (profile) {
+          setUserProfile(profile);
+        }
+      }
+      
+      // Then try to fetch from API
+      import('@/services/caseQueueService').then(({ caseQueueService }) => {
+        caseQueueService.getCaseDetails(selectedCaseId)
+          .then(data => {
+            if (data && data.case) {
+              setSelectedCase(data.case);
+              // If we have user profile data for this customer
+              if (data.case.customer) {
+                const profile = userProfiles[data.case.customer as keyof typeof userProfiles];
+                if (profile) {
+                  setUserProfile(profile);
+                }
+              }
+            }
+            setIsLoading(false);
+          })
+          .catch(err => {
+            console.error('Failed to fetch case details:', err);
+            setIsLoading(false);
+          });
+      });
+      
+      // Fetch similar cases
       similarCasesService.getSimilarCases(selectedCaseId)
         .then(data => {
           setSimilarCases(data);
-          setIsLoading(false);
         })
         .catch(err => {
           console.error('Failed to fetch similar cases:', err);
           setError('Failed to load similar cases');
-          setIsLoading(false);
         });
     } else {
+      setSelectedCase(null);
+      setUserProfile(userProfiles["Bob Johnson"]);
       setSimilarCases([]);
     }
   }, [selectedCaseId]);
-  // Find the selected case
-  const selectedCase = cases.find((c) => c.id === selectedCaseId);
-
-  // Get the user profile based on the selected case
-  const userProfile = selectedCase && userProfiles[selectedCase.customer as keyof typeof userProfiles] 
-    ? userProfiles[selectedCase.customer as keyof typeof userProfiles] 
-    : userProfiles["Bob Johnson"]; // Default to Bob Johnson if no case selected
 
   return (
     <div className="w-full bg-white/70 dark:bg-slate-900/70 border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20 flex flex-col overflow-hidden">
@@ -278,7 +268,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase 
             <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300">Similar Cases</h3>
           </div>
           <div className="space-y-3">
-            {isLoading ? (
+            {isLoading && similarCases.length === 0 ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-5 w-5 text-amber-500 animate-spin mr-2" />
                 <span className="text-sm text-slate-600 dark:text-slate-400">Loading similar cases...</span>

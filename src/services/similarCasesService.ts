@@ -1,5 +1,5 @@
 import api from './api';
-import { Case, cases } from '@/components/CaseDetail';
+import { Case } from '@/components/CaseDetail';
 
 export interface SimilarCase extends Case {
   similarity: number; // Similarity score (0-100)
@@ -66,13 +66,11 @@ export const similarCasesService = {
    */
   getSimilarCases: async (caseId: number): Promise<SimilarCase[]> => {
     try {
-      // Try to fetch from API
-      const response = await api.get('/db/similar-cases', {
-        params: { case_id: caseId }
-      });
+      // Using the correct endpoint from the API docs
+      const response = await api.get(`/cases/${caseId}/similar`);
       
-      if (response.data && Array.isArray(response.data)) {
-        return response.data;
+      if (response.data && Array.isArray(response.data.similar_cases)) {
+        return response.data.similar_cases;
       }
       
       // Return fallback data for the specific case ID
