@@ -3,7 +3,7 @@ import axios from "axios";
 // Create axios instance with default config
 const api = axios.create({
   baseURL: "http://backend-alb-server-229761153.us-east-1.elb.amazonaws.com",
-  timeout: 10000,
+  timeout: 0, // 0 means no timeout - unlimited wait time
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
