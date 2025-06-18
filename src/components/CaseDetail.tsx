@@ -502,7 +502,7 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase, userInfo 
       </div>
 
       {/* Case Study Dialog */}
-      <CaseStudyDialog isOpen={showCaseStudyDialog} onClose={() => setShowCaseStudyDialog(false)} selectedCase={selectedCase} />
+      <CaseStudyDialog isOpen={showCaseStudyDialog} onClose={() => setShowCaseStudyDialog(false)} selectedCase={selectedCase} userInfo={userInfo} />
     </div>
   );
 };

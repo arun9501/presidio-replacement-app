@@ -85,7 +85,7 @@ const Index = () => {
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:via-purple-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
                 AutoCaseAI
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block font-medium">Intelligent Dispute Resolution</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block font-medium">Intelligent Chargeback Analysis</p>
             </div>
           </div>
 
