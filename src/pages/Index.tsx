@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import CaseQueue from '@/components/CaseQueue';
-import CaseDetail from '@/components/CaseDetail';
-import UserProfile from '@/components/UserProfile';
-import CreateCaseQueue from '@/components/CreateCaseQueue';
-import GenerateCaseStudy from '@/components/GenerateCaseStudy';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { Search, Bell, Settings, Sparkles, Plus, BarChart3, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useIsMobile } from '@/hooks/use-mobile';
+import React, { useState, useEffect } from "react";
+import CaseQueue from "@/components/CaseQueue";
+import CaseDetail from "@/components/CaseDetail";
+import UserProfile from "@/components/UserProfile";
+import CreateCaseQueue from "@/components/CreateCaseQueue";
+import GenerateCaseStudy from "@/components/GenerateCaseStudy";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Search, Bell, Settings, Sparkles, Plus, BarChart3, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [selectedCase, setSelectedCase] = useState<number | null>(2);
-  const [activeTab, setActiveTab] = useState('cases');
+  const [activeTab, setActiveTab] = useState("cases");
   const isMobile = useIsMobile();
 
   return (
@@ -26,16 +26,15 @@ const Index = () => {
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
-      
+
       {/* Modern Header with glassmorphism */}
       <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-slate-700/50 shadow-lg shadow-purple-500/5 dark:shadow-purple-500/20 px-3 sm:px-6 py-3 sm:py-4 relative">
         <div className="absolute right-3 sm:right-6 top-1/2 transform -translate-y-1/2 z-10">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-xl transition-all duration-200 group"
-            onClick={() => console.log('Logout clicked')}
-          >
+            onClick={() => console.log("Logout clicked")}>
             <LogOut className="h-4 w-4 text-rose-500 dark:text-rose-400 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors" />
           </Button>
         </div>
@@ -50,33 +49,14 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:via-purple-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
-                AutoCaseAI
+                Presidio
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block font-medium">Intelligent Dispute Resolution</p>
             </div>
           </div>
 
-          {/* Enhanced Search Bar */}
-          <div className="hidden md:flex items-center flex-1 max-w-md ml-auto mr-4 lg:mr-8">
-            <div className="relative w-full group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 h-4 w-4 transition-colors duration-200" />
-              <Input
-                placeholder="Search cases, customers..."
-                className="pl-10 pr-3 py-2 h-10 bg-white/50 dark:bg-slate-800/50 border-white/30 dark:border-slate-700/50 focus:border-violet-300 dark:focus:border-violet-500 rounded-xl shadow-lg shadow-violet-500/5 backdrop-blur-sm transition-all duration-200 focus:shadow-violet-500/20"
-              />
-            </div>
-          </div>
-
           {/* Enhanced Action Buttons */}
           <div className="flex items-center gap-1 sm:gap-2 pr-10 sm:pr-12">
-            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 relative hover:bg-violet-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-200 group">
-              <Bell className="h-4 w-4 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
-              <span className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse shadow-lg"></span>
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-violet-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-200 group">
-              <Settings className="h-4 w-4 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
-            </Button>
-
             <ThemeToggle />
           </div>
         </div>
@@ -97,17 +77,23 @@ const Index = () => {
       <div className="w-full px-3 sm:px-6 py-4 flex flex-col h-[calc(100vh-73px)] md:h-[calc(100vh-60px)]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
           <TabsList className="grid w-full grid-cols-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-lg shadow-purple-500/5 overflow-hidden">
-            <TabsTrigger value="cases" className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200 data-[state=active]:shadow-md">
+            <TabsTrigger
+              value="cases"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200 data-[state=active]:shadow-md">
               <Search className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">Case Management</span>
               <span className="sm:hidden">Cases</span>
             </TabsTrigger>
-            <TabsTrigger value="create" className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg transition-all duration-200 data-[state=active]:shadow-md">
+            <TabsTrigger
+              value="create"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg transition-all duration-200 data-[state=active]:shadow-md">
               <Plus className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">Create Case</span>
               <span className="sm:hidden">Create</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white rounded-lg transition-all duration-200 data-[state=active]:shadow-md">
+            <TabsTrigger
+              value="analytics"
+              className="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white rounded-lg transition-all duration-200 data-[state=active]:shadow-md">
               <BarChart3 className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">Analytics</span>
               <span className="sm:hidden">Charts</span>

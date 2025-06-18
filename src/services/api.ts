@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: 'https://api.example.com', // Replace with your actual API base URL
+  baseURL: 'http://backend-alb-server-229761153.us-east-1.elb.amazonaws.com',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

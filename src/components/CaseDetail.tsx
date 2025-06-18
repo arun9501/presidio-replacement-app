@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, DollarSign, Calendar, BarChart2, TrendingUp } from 'lucide-react';
+import { User, DollarSign, Calendar, BarChart2, TrendingUp, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import CaseStudyDialog from './CaseStudyDialog';
+import { transactionService, Transaction } from '@/services/transactionService';
 
 // Case data type
 export interface Case {
@@ -133,9 +134,33 @@ interface CaseDetailProps {
 
 const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
   const [showCaseStudyDialog, setShowCaseStudyDialog] = useState(false);
+  const [transactionData, setTransactionData] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Find the selected case from the cases array
   const selectedCase = cases.find(c => c.id === caseId);
+  
+  // Fetch transaction data when case ID changes
+  useEffect(() => {
+    if (caseId) {
+      setIsLoading(true);
+      setError(null);
+      
+      transactionService.getTransactionsByCaseId(caseId)
+        .then(data => {
+          setTransactionData(data);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          console.error('Failed to fetch transactions:', err);
+          setError('Failed to load transaction data');
+          setIsLoading(false);
+        });
+    } else {
+      setTransactionData([]);
+    }
+  }, [caseId]);
 
   if (!caseId || !selectedCase) {
     return (
@@ -313,27 +338,50 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId }) => {
                   </tr>
                 </thead>
               <tbody>
-                {transactions.map((transaction, index) => (
-                  <tr key={index} className="border-b border-white/20 dark:border-slate-700/50 hover:bg-white/30 dark:hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">{transaction.time}</td>
-                    <td className="py-3 px-4 text-sm text-slate-900 dark:text-slate-200">{transaction.transaction}</td>
-                    <td className={`py-3 px-4 text-sm font-medium ${
-                      transaction.amount.startsWith('+') ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                    }`}>
-                      {transaction.amount}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-slate-900 dark:text-slate-200">{transaction.balance}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        transaction.status === 'Failed' ? 'bg-rose-100/70 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300 border border-rose-200/50 dark:border-rose-800/50' : 
-                        transaction.status === 'Disputed' ? 'bg-purple-100/70 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/50' : 
-                        'bg-emerald-100/70 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50'
-                      }`}>
-                        {transaction.status}
-                      </span>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center">
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 text-violet-500 animate-spin mr-2" />
+                        <span className="text-slate-600 dark:text-slate-400">Loading transactions...</span>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : error ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-rose-600 dark:text-rose-400">
+                      {error}
+                    </td>
+                  </tr>
+                ) : transactionData.length > 0 ? (
+                  transactionData.map((transaction, index) => (
+                    <tr key={transaction.transaction_id || index} className="border-b border-white/20 dark:border-slate-700/50 hover:bg-white/30 dark:hover:bg-slate-800/30 transition-colors">
+                      <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">{transaction.time || new Date(transaction.timestamp).toLocaleString()}</td>
+                      <td className="py-3 px-4 text-sm text-slate-900 dark:text-slate-200">{transaction.transaction_type}</td>
+                      <td className={`py-3 px-4 text-sm font-medium ${
+                        transaction.amount && transaction.amount.toString().startsWith('+') ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                      }`}>
+                        {transaction.amount}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-slate-900 dark:text-slate-200">{transaction.balance}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          transaction.status === 'Failed' ? 'bg-rose-100/70 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300 border border-rose-200/50 dark:border-rose-800/50' : 
+                          transaction.status === 'Disputed' ? 'bg-purple-100/70 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/50' : 
+                          'bg-emerald-100/70 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50'
+                        }`}>
+                          {transaction.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-slate-600 dark:text-slate-400">
+                      No transactions found for this case.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
             </div>
