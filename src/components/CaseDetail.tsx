@@ -156,7 +156,7 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase, userInfo 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [caseData, setCaseData] = useState<Case | null>(null);
-  const [userData, setUserData] = useState<any>(null);
+  // Removed userData state as we're using userInfo props directly
   const [activityChartData, setActivityChartData] = useState(activityData);
   const [timelineChartData, setTimelineChartData] = useState(timelineData);
 
@@ -170,13 +170,7 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase, userInfo 
     setActivityChartData(activityData);
     setTimelineChartData(timelineData);
 
-    // If userInfo is passed as prop, use it immediately
-    if (userInfo) {
-      setUserData(userInfo);
-    } else {
-      // Reset only if no userInfo is provided
-      setUserData(null);
-    }
+    // We'll only use userInfo from props and not set userData anymore
 
     if (caseId) {
       setIsLoading(true);
@@ -188,10 +182,7 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase, userInfo 
         .getCaseDetails(caseId)
         .then((data) => {
           setCaseData(data.case);
-          // Store user info if available and not already provided via props
-          if (data.user_info && !userInfo) {
-            setUserData(data.user_info);
-          }
+          // We'll only use userInfo from props and not set userData anymore
           // Format transactions from case queue API response
           // data.transactions contains the related_transactions from the case queue API
           const formattedTransactions = (data.transactions || []).map((tx) => ({
@@ -275,19 +266,19 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ caseId, onSelectCase, userInfo 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                  <span className="font-medium">{userData?.name || selectedCase.customer}</span>
+                  <span className="font-medium">{userInfo.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <span className="font-medium">{typeof selectedCase.amount === "string" ? selectedCase.amount : `${selectedCase.amount}`}</span>
                 </div>
-                {userData?.created_at && (
+                {userInfo.created_at && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                     <span className="font-medium">
-                      {typeof userData.created_at === "string" && userData.created_at.includes(",")
-                        ? userData.created_at
-                        : new Date(userData.created_at).toLocaleString("en-US", {
+                      {typeof userInfo.created_at === "string" && userInfo.created_at.includes(",")
+                        ? userInfo.created_at
+                        : new Date(userInfo.created_at).toLocaleString("en-US", {
                             month: "short",
                             day: "2-digit",
                             year: "numeric",

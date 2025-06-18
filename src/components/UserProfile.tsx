@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from "react";
-import { caseQueueService } from '@/services/caseQueueService';
+import { caseQueueService } from "@/services/caseQueueService";
 import { User, Shield, TrendingUp, Activity, Calendar, DollarSign, ArrowRight, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -102,28 +102,39 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase,
   const [apiUserInfo, setApiUserInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+  console.log("userInfo", userInfo);
+
   // Handle user data updates - combined effect for better performance
   useEffect(() => {
     // If userInfo is passed as prop, use it immediately
     if (userInfo) {
       setApiUserInfo(userInfo);
-      
+
       // Create a merged profile with API data
       const apiProfile = {
         id: userInfo.user_id,
         riskScore: userInfo.risk_score || "50/100 (Medium)",
-        registration: userInfo.registration_date || new Date().toLocaleDateString(),
+        registration: userInfo.registration_date
+          ? new Date(userInfo.registration_date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+            })
+          : new Date().toLocaleDateString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+            }),
         balance: userInfo.balance || "$0.00",
         activity: userInfo.activity || {
-          bets: 0,
-          deposits: 0,
-          withdrawals: 0,
-          logins: 0,
+          bets: 21,
+          deposits: 9,
+          withdrawals: 6,
+          logins: 40,
         },
-        recentActivity: userInfo.recent_activity || ""
+        recentActivity: userInfo.recent_activity || "Customer reported unauthorized transaction from unknown device.",
       };
-      
+
       setUserProfile(apiProfile);
       // Skip API call if we already have user info
       if (selectedCaseId === userInfo.user_id) {
@@ -133,10 +144,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase,
       // Reset only if no userInfo is provided
       setApiUserInfo(null);
     }
-    
+
     if (selectedCaseId) {
       setIsLoading(true);
-      
+
       // Find the case in the static data first for immediate display
       const staticCase = cases.find((c) => c.id === selectedCaseId);
       if (staticCase) {
@@ -146,57 +157,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase,
           setUserProfile(profile);
         }
       }
-      
-      // Then try to fetch from API directly
-      caseQueueService.getCaseDetails(selectedCaseId)
-        .then(data => {
-            if (data && data.case) {
-              setSelectedCase(data.case);
-              
-              // If we have user_info from API, use it
-              if (data.user_info) {
-                setApiUserInfo(data.user_info);
-                
-                // Create a merged profile with API data
-                const apiProfile = {
-                  id: data.user_info.user_id,
-                  riskScore: data.user_info.risk_score || "50/100 (Medium)",
-                  registration: data.user_info.registration_date || new Date().toLocaleDateString(),
-                  balance: data.user_info.balance || "$0.00",
-                  activity: data.user_info.activity || {
-                    bets: 0,
-                    deposits: 0,
-                    withdrawals: 0,
-                    logins: 0,
-                  },
-                  recentActivity: data.user_info.recent_activity || ""
-                };
-                
-                setUserProfile(apiProfile);
-              } 
-              // Fallback to static profiles if no API data
-              else if (data.case.customer) {
-                const profile = userProfiles[data.case.customer as keyof typeof userProfiles];
-                if (profile) {
-                  setUserProfile(profile);
-                }
-              }
-            }
-            setIsLoading(false);
-          })
-          .catch(err => {
-            console.error('Failed to fetch case details:', err);
-            setIsLoading(false);
-          });
-      
+
       // Fetch similar cases
-      similarCasesService.getSimilarCases(selectedCaseId)
-        .then(data => {
+      similarCasesService
+        .getSimilarCases(selectedCaseId)
+        .then((data) => {
           setSimilarCases(data);
         })
-        .catch(err => {
-          console.error('Failed to fetch similar cases:', err);
-          setError('Failed to load similar cases');
+        .catch((err) => {
+          console.error("Failed to fetch similar cases:", err);
+          setError("Failed to load similar cases");
         });
     } else {
       setSelectedCase(null);
@@ -237,7 +207,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase,
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Name:</span>
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{apiUserInfo?.name || selectedCase?.customer || "Bob Johnson"}</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{apiUserInfo?.name || "Bob Johnson"}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Status:</span>
@@ -335,11 +305,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase,
               </div>
             ) : (
               similarCases.map((similarCase) => (
-                <div 
+                <div
                   key={similarCase.id}
                   className="group p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer border border-white/40 dark:border-slate-700/40 hover:border-amber-200/50 dark:hover:border-amber-700/50 hover:shadow-lg hover:shadow-amber-500/10"
-                  onClick={() => onSelectCase && onSelectCase(similarCase.id)}
-                >
+                  onClick={() => onSelectCase && onSelectCase(similarCase.id)}>
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -358,21 +327,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase,
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectCase && onSelectCase(similarCase.id);
-                      }}
-                    >
+                      }}>
                       <ArrowRight className="h-3 w-3 text-amber-600 dark:text-amber-400" />
                     </Button>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
-                        style={{ width: `${similarCase.similarity}%` }}
-                      ></div>
+                      <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" style={{ width: `${similarCase.similarity}%` }}></div>
                     </div>
-                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">
-                      {similarCase.similarity}%
-                    </span>
+                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">{similarCase.similarity}%</span>
                   </div>
                 </div>
               ))
@@ -388,8 +351,5 @@ const UserProfile: React.FC<UserProfileProps> = ({ selectedCaseId, onSelectCase,
 // Memoize the component with custom comparison to ensure updates when selectedCaseId changes
 export default memo(UserProfile, (prevProps, nextProps) => {
   // Only re-render if these props haven't changed
-  return (
-    prevProps.selectedCaseId === nextProps.selectedCaseId && 
-    prevProps.userInfo === nextProps.userInfo
-  );
+  return prevProps.selectedCaseId === nextProps.selectedCaseId && prevProps.userInfo === nextProps.userInfo;
 });
