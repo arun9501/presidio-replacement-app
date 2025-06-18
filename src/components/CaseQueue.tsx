@@ -186,7 +186,8 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase, onUse
           name: selectedCaseData.customer,
           registration_date: new Date().toLocaleDateString(),
           risk_score: "50/100 (Medium)",
-          balance: selectedCaseData.amount
+          balance: selectedCaseData.amount,
+          created_at: selectedCaseData.date // Include the date as created_at
         };
         // Send minimal info immediately
         onUserInfoChange(minimalUserInfo);
@@ -194,9 +195,14 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase, onUse
       
       // Then check for more detailed API data
       const selectedApiCase = apiCases.find(apiCase => apiCase.case_id === selectedCase);
-      if (selectedApiCase?.user_info) {
-        // Send complete info when available
-        onUserInfoChange(selectedApiCase.user_info);
+      if (selectedApiCase) {
+        // Send complete info when available, including created_at from the case itself
+        const enhancedUserInfo = {
+          ...(selectedApiCase.user_info || {}),
+          created_at: selectedApiCase.created_at,
+          user_id: selectedApiCase.user_id
+        };
+        onUserInfoChange(enhancedUserInfo);
       }
     }
   }, [selectedCase, apiCases, cases, onUserInfoChange]);
@@ -381,8 +387,8 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase, onUse
                         : 'bg-white/50 dark:bg-slate-800/50 border border-white/50 dark:border-slate-700/30 hover:bg-white/80 dark:hover:bg-slate-800/80'}`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className={`font-medium ${selectedCase === caseItem.id ? 'text-violet-900 dark:text-violet-200' : 'text-slate-900 dark:text-slate-200'}`}>
-                        {caseItem.title}
+                      <h3 className={`font-medium text-xs ${selectedCase === caseItem.id ? 'text-violet-900 dark:text-violet-200' : 'text-slate-900 dark:text-slate-200'}`}>
+                        #{caseItem.id}: {caseItem.title}
                       </h3>
                       <Badge variant="outline" className={`ml-2 ${priorityConfig.color}`}>
                         <PriorityIcon className="h-3 w-3 mr-1" />
@@ -390,18 +396,23 @@ const CaseQueue: React.FC<CaseQueueProps> = ({ selectedCase, onSelectCase, onUse
                       </Badge>
                     </div>
                     
-                    <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 mb-2">
-                      <User className="h-3.5 w-3.5 mr-1.5 text-slate-500 dark:text-slate-500" />
-                      {caseItem.customer}
+                    <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-2">
+                      <div className="flex items-center">
+                        <User className="h-3 w-3 mr-1.5 text-slate-500 dark:text-slate-500" />
+                        {caseItem.customer}
+                      </div>
+                      <Badge className={`text-xs ${caseItem.status === 'Open' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-200 dark:border-blue-800/50' : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-800/50'}`}>
+                        {caseItem.status}
+                      </Badge>
                     </div>
                     
                     <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center text-slate-500 dark:text-slate-500">
-                        <Calendar className="h-3 w-3 mr-1" />
+                      <div className="flex items-center text-slate-500 dark:text-slate-500 text-[10px]">
+                        <Calendar className="h-2.5 w-2.5 mr-1" />
                         {caseItem.date}
                       </div>
-                      <div className="flex items-center font-medium text-emerald-700 dark:text-emerald-400">
-                        <DollarSign className="h-3 w-3 mr-0.5" />
+                      <div className="flex items-center font-medium text-emerald-700 dark:text-emerald-400 text-[10px]">
+                        <DollarSign className="h-2.5 w-2.5 mr-0.5" />
                         {caseItem.amount}
                       </div>
                     </div>
